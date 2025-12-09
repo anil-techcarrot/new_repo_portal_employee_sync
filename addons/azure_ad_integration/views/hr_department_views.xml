@@ -10,8 +10,7 @@
             <field name="arch" type="xml">
                 <!-- Add after Manager field -->
                 <xpath expr="//field[@name='manager_id']" position="after">
-                    <field name="azure_dl_email" readonly="1"
-                           attrs="{'invisible': [('azure_dl_email', '=', False)]}"/>
+                    <field name="azure_dl_email" readonly="1" invisible="azure_dl_email == False"/>
                     <field name="azure_dl_id" invisible="1"/>
                 </xpath>
             </field>
