@@ -31,8 +31,8 @@
                                 class="btn-warning"
                                 icon="fa-minus-circle"
                                 confirm="Remove license from this employee?"
-                                invisible="not azure_license_assigned"/>
-
+                                attrs="{'invisible': [('azure_license_assigned', '=', False)]}"/>
+                        <!--                                invisible="azure_license_assigned == False"/>-->
                     </group>
 
                     <group string="Quick Actions">
