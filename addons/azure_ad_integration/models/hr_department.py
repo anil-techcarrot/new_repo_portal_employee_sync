@@ -52,9 +52,12 @@ class HRDepartment(models.Model):
 
             headers = {"Authorization": f"Bearer {token}"}
 
-            # Generate expected DL email: Test → DL_Test@domain
-            dept_name_clean = self.name.replace(' ', '_').replace('&', 'and')
-            expected_dl_email = f"DL_{dept_name_clean}@{domain}"
+            # MODIFIED: Try both uppercase and lowercase versions
+            dept_name_upper = self.name.replace(' ', '_').replace('&', 'and')
+            dept_name_lower = self.name.lower().replace(' ', '_').replace('&', 'and')
+
+            # Try uppercase first (DL_Test)
+            expected_dl_email = f"DL_{dept_name_upper}@{domain}"
 
             _logger.info(f"🔍 Searching for: {expected_dl_email}")
 
@@ -62,33 +65,47 @@ class HRDepartment(models.Model):
             search_url = f"https://graph.microsoft.com/v1.0/groups?$filter=mail eq '{expected_dl_email}'"
             response = requests.get(search_url, headers=headers, timeout=30)
 
+            groups = []
             if response.status_code == 200:
                 groups = response.json().get('value', [])
-                if groups:
-                    group = groups[0]
-                    self.write({
-                        'azure_dl_email': group.get('mail'),
-                        'azure_dl_id': group.get('id')
-                    })
-                    _logger.info(f"✅ Linked: {self.name} → {group.get('mail')}")
-                    return {
-                        'type': 'ir.actions.client',
-                        'tag': 'display_notification',
-                        'params': {
-                            'message': f"✅ Linked to {group.get('mail')}",
-                            'type': 'success',
-                        }
+
+            # MODIFIED: If not found with uppercase, try lowercase (DL_test)
+            if not groups and dept_name_upper != dept_name_lower:
+                expected_dl_email = f"DL_{dept_name_lower}@{domain}"
+                _logger.info(f"🔍 Trying lowercase: {expected_dl_email}")
+
+                search_url = f"https://graph.microsoft.com/v1.0/groups?$filter=mail eq '{expected_dl_email}'"
+                response = requests.get(search_url, headers=headers, timeout=30)
+
+                if response.status_code == 200:
+                    groups = response.json().get('value', [])
+
+            # MODIFIED: Updated error messages
+            if groups:
+                group = groups[0]
+                self.write({
+                    'azure_dl_email': group.get('mail'),
+                    'azure_dl_id': group.get('id')
+                })
+                _logger.info(f"✅ Linked: {self.name} → {group.get('mail')}")
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'message': f"✅ Linked to {group.get('mail')}",
+                        'type': 'success',
                     }
-                else:
-                    _logger.warning(f"⚠️ DL not found: {expected_dl_email}")
-                    return {
-                        'type': 'ir.actions.client',
-                        'tag': 'display_notification',
-                        'params': {
-                            'message': f"⚠️ DL not found: {expected_dl_email}. Please create it in Azure first.",
-                            'type': 'warning',
-                        }
+                }
+            else:
+                _logger.warning(f"⚠️ DL not found: DL_{dept_name_upper} or DL_{dept_name_lower}")
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'message': f"⚠️ DL not found. Tried: DL_{dept_name_upper}@{domain} and DL_{dept_name_lower}@{domain}",
+                        'type': 'warning',
                     }
+                }
 
         except Exception as e:
             _logger.error(f"❌ Error: {e}")
