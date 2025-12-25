@@ -63,8 +63,8 @@ class HREmployee(models.Model):
             # IMPORTANT: Commit the sync result
             sync_result = dept.action_sync_dl_from_azure()
 
-            # Refresh department to get updated values
-            dept.invalidate_cache(['azure_dl_id', 'azure_dl_email'])
+            # Refresh department to get updated values - FIXED LINE
+            dept._invalidate_cache(['azure_dl_id', 'azure_dl_email'])
 
             if not dept.azure_dl_id:
                 _logger.warning(f"⚠️ Could not sync DL for department '{dept.name}'")
