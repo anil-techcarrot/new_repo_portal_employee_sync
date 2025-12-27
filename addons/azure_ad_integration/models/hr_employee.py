@@ -51,18 +51,35 @@ class HREmployee(models.Model):
         """Sync department DL if needed, then add employee - FULLY AUTOMATIC"""
         self.ensure_one()
 
-        if not self.department_id or not self.azure_user_id:
-            _logger.warning(f"⚠️ Missing dept or user_id for {self.name}")
+        _logger.info(f"=" * 80)
+        _logger.info(f"🚀 Starting _sync_dept_and_add_to_dl for {self.name}")
+        _logger.info(f"   Employee ID: {self.id}")
+        _logger.info(f"   Azure User ID: {self.azure_user_id}")
+        _logger.info(f"   Department: {self.department_id.name if self.department_id else 'None'}")
+        _logger.info(f"   Department ID: {self.department_id.id if self.department_id else 'None'}")
+
+        if not self.department_id:
+            _logger.warning(f"⚠️ No department for {self.name}")
+            return
+
+        if not self.azure_user_id:
+            _logger.warning(f"⚠️ No Azure User ID for {self.name}")
             return
 
         dept = self.department_id
+
+        _logger.info(f"📋 Current Department State:")
+        _logger.info(f"   Name: {dept.name}")
+        _logger.info(f"   DL ID: {dept.azure_dl_id}")
+        _logger.info(f"   DL Email: {dept.azure_dl_email}")
 
         # If department has no DL configured, try to sync it automatically
         if not dept.azure_dl_id:
             _logger.info(f"🔄 Department '{dept.name}' has no DL, attempting auto-sync...")
 
             # Call sync
-            dept.action_sync_dl_from_azure()
+            sync_result = dept.action_sync_dl_from_azure()
+            _logger.info(f"   Sync result: {sync_result}")
 
             # CRITICAL FIX: Invalidate cache AND re-browse to get fresh data
             dept.invalidate_recordset(['azure_dl_id', 'azure_dl_email'])
@@ -78,6 +95,8 @@ class HREmployee(models.Model):
                 _logger.warning(f"⚠️ Could not sync DL for department '{dept.name}'")
                 _logger.warning(f"   Please create DL_{dept.name}@techcarrot.ae in Azure")
                 return
+        else:
+            _logger.info(f"✅ Department already has DL configured")
 
         # If DL is now configured, add employee
         if dept.azure_dl_id:
@@ -87,11 +106,21 @@ class HREmployee(models.Model):
             _logger.info(f"   User ID: {self.azure_user_id}")
 
             # Add employee to DL
-            self._add_to_dept_dl()
+            _logger.info(f"🎯 Calling _add_to_dept_dl()...")
+            try:
+                self._add_to_dept_dl()
+                _logger.info(f"✅ _add_to_dept_dl() completed")
+            except Exception as e:
+                _logger.error(f"❌ Exception in _add_to_dept_dl(): {e}")
+                import traceback
+                _logger.error(traceback.format_exc())
         else:
             _logger.error(f"❌ Department '{dept.name}' has no DL configured after sync")
             _logger.error(f"   DL ID is still: {dept.azure_dl_id}")
             _logger.error(f"   DL Email is still: {dept.azure_dl_email}")
+
+        _logger.info(f"🏁 Finished _sync_dept_and_add_to_dl for {self.name}")
+        _logger.info(f"=" * 80)
 
     def _create_azure_email(self):
         """Create unique email in Azure AD"""
