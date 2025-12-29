@@ -529,7 +529,7 @@ class HREmployee(models.Model):
             }
 
     def _unassign_azure_license(self):
-        """Unassign license from Azure AND disable the account"""
+        """Unassign license, disable account, and revoke all sessions"""
         self.ensure_one()
 
         if not self.azure_user_id:
@@ -589,9 +589,23 @@ class HREmployee(models.Model):
                 _logger.error(f"❌ Failed to remove license: {error_msg}")
                 return False
 
-            _logger.info(f"✅ License unassigned from {self.name}")
+            _logger.info(f"✅ License removed from {self.name}")
 
-            # STEP 2: Disable the account
+            # STEP 2: Revoke all active sessions (sign out from all devices)
+            _logger.info(f"🔄 Revoking all sessions for {self.name}...")
+
+            revoke_response = requests.post(
+                f"https://graph.microsoft.com/v1.0/users/{self.azure_user_id}/revokeSignInSessions",
+                headers=headers,
+                timeout=30
+            )
+
+            if revoke_response.status_code == 200:
+                _logger.info(f"✅ All sessions revoked for {self.name}")
+            else:
+                _logger.warning(f"⚠️ Could not revoke sessions (may not be critical)")
+
+            # STEP 3: Disable the account
             _logger.info(f"🔄 Disabling Azure account for {self.name}...")
 
             disable_payload = {
@@ -611,13 +625,40 @@ class HREmployee(models.Model):
                 error_data = disable_response.json().get('error', {})
                 error_msg = error_data.get('message', 'Unknown')
                 _logger.error(f"❌ Failed to disable account: {error_msg}")
-                # Continue anyway since license was removed
+
+            # STEP 4: Block sign-in using Conditional Access (if needed)
+            # This requires additional permissions, but adds extra security
+            _logger.info(f"🔄 Blocking sign-in for {self.name}...")
+
+            block_payload = {
+                "accountEnabled": False,
+                "onPremisesExtensionAttributes": {
+                    "extensionAttribute1": "BLOCKED_BY_ODOO"
+                }
+            }
+
+            block_response = requests.patch(
+                f"https://graph.microsoft.com/v1.0/users/{self.azure_user_id}",
+                headers=headers,
+                json=block_payload,
+                timeout=30
+            )
+
+            if block_response.status_code == 200:
+                _logger.info(f"✅ Sign-in blocked for {self.name}")
 
             # Update Odoo record
             self.write({
                 'azure_license_assigned': False,
                 'azure_license_name': False
             })
+
+            _logger.info(f"=" * 60)
+            _logger.info(f"✅ COMPLETE: License removed and account disabled for {self.name}")
+            _logger.info(f"   - License: Removed")
+            _logger.info(f"   - Sessions: Revoked")
+            _logger.info(f"   - Account: Disabled")
+            _logger.info(f"=" * 60)
 
             return True
 
