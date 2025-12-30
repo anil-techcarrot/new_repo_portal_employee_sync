@@ -5,7 +5,7 @@
         <field name="name">azure.license.config.tree</field>
         <field name="model">azure.license.config</field>
         <field name="arch" type="xml">
-            <tree string="Azure Licenses" create="false" edit="false" delete="false">
+            <list string="Azure Licenses" create="false" edit="false" delete="false">
                 <button name="action_sync_licenses_from_azure"
                         type="object"
                         string="Sync from Azure"
@@ -20,7 +20,7 @@
                        decoration-warning="available_licenses &gt;= 5 and available_licenses &lt; 10"
                        decoration-success="available_licenses &gt;= 10"/>
                 <field name="last_sync" string="Last Updated"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -67,7 +67,7 @@
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                📊 No license information available yet
+                 No license information available yet
             </p>
             <p>
                 Click the <strong>"Sync from Azure"</strong> button to fetch license information from Microsoft Azure.
