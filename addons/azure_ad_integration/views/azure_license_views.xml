@@ -9,7 +9,7 @@
                 <header>
                     <button name="action_sync_licenses_from_azure"
                             type="object"
-                            string="🔄 Sync from Azure"
+                            string=" Sync from Azure"
                             class="btn-primary"
                             help="Click here to fetch license information from Microsoft Azure"/>
                 </header>
@@ -34,7 +34,7 @@
                 <header>
                     <button name="action_sync_licenses_from_azure"
                             type="object"
-                            string="🔄 Sync from Azure"
+                            string=" Sync from Azure"
                             class="btn-primary"/>
                 </header>
                 <sheet>
@@ -67,10 +67,10 @@
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                📊 No license information available yet
+                 No license information available yet
             </p>
             <p>
-                Click the <strong>"🔄 Sync from Azure"</strong> button above to fetch license information from Microsoft
+                Click the <strong>" Sync from Azure"</strong> button above to fetch license information from Microsoft
                 Azure.
             </p>
             <p>
