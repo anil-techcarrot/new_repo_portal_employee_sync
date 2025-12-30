@@ -24,37 +24,42 @@
 
                     <!-- License Management -->
                     <group string="License Management">
-
+                        <!-- Assign Button (shows when no license) -->
                         <button name="action_assign_license"
                                 type="object"
-                                string="Assign License"
+                                string="✅ Assign License"
                                 class="btn-success"
                                 icon="fa-plus-circle"
-                                confirm="Assign license to this employee?"
+                                confirm="Assign Microsoft 365 license to this employee?"
                                 invisible="azure_license_assigned == True or azure_user_id == False"/>
+
                         <!-- Unassign Button (shows when license exists) -->
                         <button name="action_unassign_license"
                                 type="object"
-                                string="Unassign License"
+                                string="❌ Unassign License"
                                 class="btn-warning"
                                 icon="fa-minus-circle"
-                                confirm="Remove license from this employee?"
+                                confirm="This will remove the license and DISABLE the account. Continue?"
                                 invisible="azure_license_assigned == False"/>
                     </group>
 
                     <group string="Quick Actions">
-
+                        <!-- View Licenses Button -->
                         <button name="%(azure_ad_integration.action_azure_license_dashboard)d"
                                 type="action"
-                                string="View Azure Licenses"
+                                string="📊 View Azure Licenses"
                                 class="btn-info"
-                                icon="fa-eye"/>
+                                icon="fa-eye"
+                                help="View all available Microsoft 365 licenses"/>
+
+                        <!-- View in Portal Button -->
                         <button name="action_view_azure_user"
                                 type="object"
-                                string="View in Azure Portal"
+                                string="🌐 View in Azure Portal"
                                 class="btn-primary"
                                 icon="fa-external-link"
-                                invisible="azure_user_id == False"/>
+                                invisible="azure_user_id == False"
+                                help="Open this user in Azure Active Directory portal"/>
                     </group>
                 </page>
             </xpath>

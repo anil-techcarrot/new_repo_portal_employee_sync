@@ -9,7 +9,7 @@
                 <header>
                     <button name="action_sync_licenses_from_azure"
                             type="object"
-                            string="Sync from Azure"
+                            string="🔄 Sync from Azure"
                             class="btn-primary"/>
                 </header>
                 <field name="license_name"/>
@@ -17,6 +17,7 @@
                 <field name="assigned_licenses"/>
                 <field name="available_licenses"
                        decoration-danger="available_licenses &lt; 5"
+                       decoration-warning="available_licenses &lt; 10 and available_licenses &gt;= 5"
                        decoration-success="available_licenses &gt;= 10"/>
                 <field name="last_sync"/>
             </list>
@@ -29,6 +30,12 @@
         <field name="model">azure.license.config</field>
         <field name="arch" type="xml">
             <form string="Azure License" create="false" edit="false" delete="false">
+                <header>
+                    <button name="action_sync_licenses_from_azure"
+                            type="object"
+                            string="🔄 Sync from Azure"
+                            class="btn-primary"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
@@ -40,7 +47,10 @@
                             <field name="license_sku" readonly="1"/>
                             <field name="total_licenses" readonly="1"/>
                             <field name="assigned_licenses" readonly="1"/>
-                            <field name="available_licenses" readonly="1"/>
+                            <field name="available_licenses" readonly="1"
+                                   decoration-danger="available_licenses &lt; 5"
+                                   decoration-warning="available_licenses &lt; 10 and available_licenses &gt;= 5"
+                                   decoration-success="available_licenses &gt;= 10"/>
                         </group>
                         <group string="Sync Information">
                             <field name="last_sync" readonly="1"/>
@@ -61,15 +71,16 @@
                 No license information available
             </p>
             <p>
-                Click "Sync from Azure" to fetch license information.
+                Click <strong>"Sync from Azure"</strong> button above to fetch license information from Microsoft Azure.
             </p>
         </field>
     </record>
 
-    <!-- SIMPLE MENU: Put it in Configuration submenu where you're looking -->
+    <!-- Menu under HR Configuration -->
     <menuitem id="menu_azure_licenses"
               name="Azure Licenses"
+              parent="hr.menu_hr_configuration"
               action="action_azure_license_dashboard"
-              web_icon="azure_ad_integration,static/description/icon.png"
+              groups="base.group_user"
               sequence="100"/>
 </odoo>
