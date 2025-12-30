@@ -26,14 +26,14 @@
                     <group string="License Management">
                         <div class="alert alert-info" role="alert"
                              invisible="azure_license_assigned == True or azure_user_id == False">
-                            <p><strong>ℹ️ License Not Assigned</strong></p>
+                            <p><strong> License Not Assigned</strong></p>
                             <p>Before assigning a license, please check available licenses in <strong>Azure AD → License Management</strong></p>
                         </div>
 
                         <!-- Assign Button -->
                         <button name="action_assign_license"
                                 type="object"
-                                string="✅ Assign License"
+                                string=" Assign License"
                                 class="btn-success"
                                 icon="fa-plus-circle"
                                 confirm="Are you sure you want to assign a Microsoft 365 license to this employee?"
@@ -43,7 +43,7 @@
                         <!-- Unassign Button -->
                         <button name="action_unassign_license"
                                 type="object"
-                                string="❌ Unassign License"
+                                string=" Unassign License"
                                 class="btn-warning"
                                 icon="fa-minus-circle"
                                 confirm="This will remove the license and DISABLE the user account. Are you sure?"
@@ -55,14 +55,14 @@
                     <group string="Quick Actions" col="2">
                         <button name="%(azure_ad_integration.action_azure_license_dashboard)d"
                                 type="action"
-                                string="📊 View All Licenses"
+                                string=" View All Licenses"
                                 class="btn-info btn-block"
                                 icon="fa-eye"
                                 help="Open the license management dashboard to see all available licenses"/>
 
                         <button name="action_view_azure_user"
                                 type="object"
-                                string="🌐 View in Azure Portal"
+                                string=" View in Azure Portal"
                                 class="btn-primary btn-block"
                                 icon="fa-external-link"
                                 invisible="azure_user_id == False"

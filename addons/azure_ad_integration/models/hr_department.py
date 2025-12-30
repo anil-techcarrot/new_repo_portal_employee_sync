@@ -22,7 +22,7 @@ class HRDepartment(models.Model):
         domain = params.get_param("azure_domain")
 
         if not all([tenant, client, secret, domain]):
-            _logger.error("❌ Azure credentials missing")
+            _logger.error(" Azure credentials missing")
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -47,7 +47,7 @@ class HRDepartment(models.Model):
 
             token = token_resp.get("access_token")
             if not token:
-                _logger.error("❌ Failed to get token")
+                _logger.error("Failed to get token")
                 return
 
             headers = {"Authorization": f"Bearer {token}"}
@@ -59,7 +59,7 @@ class HRDepartment(models.Model):
             # Try uppercase first (DL_Test)
             expected_dl_email = f"DL_{dept_name_upper}@{domain}"
 
-            _logger.info(f"🔍 Searching for: {expected_dl_email}")
+            _logger.info(f" Searching for: {expected_dl_email}")
 
             # Search for group by email
             search_url = f"https://graph.microsoft.com/v1.0/groups?$filter=mail eq '{expected_dl_email}'"
@@ -72,7 +72,7 @@ class HRDepartment(models.Model):
             # MODIFIED: If not found with uppercase, try lowercase (DL_test)
             if not groups and dept_name_upper != dept_name_lower:
                 expected_dl_email = f"DL_{dept_name_lower}@{domain}"
-                _logger.info(f"🔍 Trying lowercase: {expected_dl_email}")
+                _logger.info(f" Trying lowercase: {expected_dl_email}")
 
                 search_url = f"https://graph.microsoft.com/v1.0/groups?$filter=mail eq '{expected_dl_email}'"
                 response = requests.get(search_url, headers=headers, timeout=30)
@@ -87,28 +87,28 @@ class HRDepartment(models.Model):
                     'azure_dl_email': group.get('mail'),
                     'azure_dl_id': group.get('id')
                 })
-                _logger.info(f"✅ Linked: {self.name} → {group.get('mail')}")
+                _logger.info(f" Linked: {self.name} → {group.get('mail')}")
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
-                        'message': f"✅ Linked to {group.get('mail')}",
+                        'message': f" Linked to {group.get('mail')}",
                         'type': 'success',
                     }
                 }
             else:
-                _logger.warning(f"⚠️ DL not found: DL_{dept_name_upper} or DL_{dept_name_lower}")
+                _logger.warning(f" DL not found: DL_{dept_name_upper} or DL_{dept_name_lower}")
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
-                        'message': f"⚠️ DL not found. Tried: DL_{dept_name_upper}@{domain} and DL_{dept_name_lower}@{domain}",
+                        'message': f" DL not found. Tried: DL_{dept_name_upper}@{domain} and DL_{dept_name_lower}@{domain}",
                         'type': 'warning',
                     }
                 }
 
         except Exception as e:
-            _logger.error(f"❌ Error: {e}")
+            _logger.error(f" Error: {e}")
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -116,4 +116,5 @@ class HRDepartment(models.Model):
                     'message': f'Error: {str(e)}',
                     'type': 'danger',
                 }
+
             }
