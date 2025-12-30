@@ -31,9 +31,7 @@
             <form string="Azure License" create="false" edit="false" delete="false">
                 <sheet>
                     <div class="oe_title">
-                        <h1>
-                            <field name="license_name" readonly="1"/>
-                        </h1>
+                        <h1><field name="license_name" readonly="1"/></h1>
                     </div>
                     <group>
                         <group string="License Information">
@@ -66,15 +64,10 @@
         </field>
     </record>
 
-    <menuitem id="menu_azure_root"
-              name="Azure"
-              parent="hr.menu_hr_root"
-              sequence="95"/>
-
-    <!-- Add Menu Item under Employees -->
+    <!-- SIMPLE MENU: Put it in Configuration submenu where you're looking -->
     <menuitem id="menu_azure_licenses"
               name="Azure Licenses"
-              parent="hr.menu_hr_root"
+              parent="hr.menu_human_resources_configuration"
               action="action_azure_license_dashboard"
-              sequence="10"/>
+              sequence="100"/>
 </odoo>
