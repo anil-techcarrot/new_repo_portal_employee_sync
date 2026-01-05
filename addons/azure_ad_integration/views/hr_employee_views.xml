@@ -1,11 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Employee Form with License Management -->
+    <!-- Employee Form with SharePoint Fields -->
     <record id="view_employee_form_azure_license" model="ir.ui.view">
         <field name="name">hr.employee.form.azure.license</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
+
+            <!-- Add SharePoint Fields to Personal Information -->
+            <xpath expr="//page[@name='personal_information']" position="inside">
+                <group string="Name Details (From SharePoint)">
+                    <group>
+                        <field name="employee_first_name"/>
+                        <field name="employee_middle_name"/>
+                        <field name="employee_last_name"/>
+                    </group>
+                    <group>
+                        <field name="place_of_birth"/>
+                    </group>
+                </group>
+
+                <group string="Languages">
+                    <group>
+                        <field name="mother_tongue_id"/>
+                    </group>
+                    <group>
+                        <field name="language_known_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+            </xpath>
 
             <!-- Azure AD Info Tab -->
             <xpath expr="//notebook" position="inside">
@@ -22,51 +45,24 @@
                         </group>
                     </group>
 
-                    <!-- License Management Section -->
+                    <!-- License Management -->
                     <group string="License Management">
-                        <div class="alert alert-info" role="alert"
-                             invisible="azure_license_assigned == True or azure_user_id == False">
-                            <p><strong> License Not Assigned</strong></p>
-                            <p>Before assigning a license, please check available licenses in <strong>Azure AD → License Management</strong></p>
-                        </div>
-
-                        <!-- Assign Button -->
-                        <button name="action_assign_license"
-                                type="object"
-                                string=" Assign License"
-                                class="btn-success"
-                                icon="fa-plus-circle"
-                                confirm="Are you sure you want to assign a Microsoft 365 license to this employee?"
-                                invisible="azure_license_assigned == True or azure_user_id == False"
-                                help="This will assign an available Microsoft 365 license"/>
-
-                        <!-- Unassign Button -->
                         <button name="action_unassign_license"
                                 type="object"
-                                string=" Unassign License"
+                                string="Unassign License"
                                 class="btn-warning"
                                 icon="fa-minus-circle"
-                                confirm="This will remove the license and DISABLE the user account. Are you sure?"
-                                invisible="azure_license_assigned == False"
-                                help="This will remove the license and disable the Azure account"/>
+                                confirm="Remove license from this employee?"
+                                invisible="azure_license_assigned == False"/>
                     </group>
 
-                    <!-- Quick Actions -->
-                    <group string="Quick Actions" col="2">
-                        <button name="%(azure_ad_integration.action_azure_license_dashboard)d"
-                                type="action"
-                                string=" View All Licenses"
-                                class="btn-info btn-block"
-                                icon="fa-eye"
-                                help="Open the license management dashboard to see all available licenses"/>
-
+                    <group string="Quick Actions">
                         <button name="action_view_azure_user"
                                 type="object"
-                                string=" View in Azure Portal"
-                                class="btn-primary btn-block"
+                                string="View in Azure Portal"
+                                class="btn-primary"
                                 icon="fa-external-link"
-                                invisible="azure_user_id == False"
-                                help="Open this user's profile in Azure Active Directory portal"/>
+                                invisible="azure_user_id == False"/>
                     </group>
                 </page>
             </xpath>
@@ -81,6 +77,8 @@
         <field name="inherit_id" ref="hr.view_employee_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='work_email']" position="after">
+                <field name="employee_first_name" optional="hide"/>
+                <field name="employee_last_name" optional="hide"/>
                 <field name="azure_email" optional="show"/>
                 <field name="azure_license_assigned" optional="show" widget="boolean"/>
                 <field name="azure_license_name" optional="hide"/>
