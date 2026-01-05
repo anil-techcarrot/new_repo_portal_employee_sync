@@ -18,6 +18,12 @@ class HREmployee(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Automatically runs when employee is created"""
+
+        # VALIDATE work_email for duplicates BEFORE creating
+        for vals in vals_list:
+            if vals.get('work_email'):
+                self._validate_work_email(vals.get('work_email'))
+
         employees = super().create(vals_list)
 
         for emp in employees:
@@ -25,17 +31,20 @@ class HREmployee(models.Model):
                 # Step 1: Create Azure user
                 emp._create_azure_email()
 
-                # Step 2: LICENSE ASSIGNMENT NOW MANUAL - REMOVED!
-                # Admin must manually assign license via button
-
-                # Step 3: Add to department DL automatically
+                # Step 2: Add to department DL automatically
                 if emp.department_id and emp.azure_user_id:
                     emp._sync_dept_and_add_to_dl()
 
         return employees
 
     def write(self, vals):
-        """Monitor department changes and auto-assign to new DL"""
+        """Monitor department changes and validate email changes"""
+
+        # VALIDATE work_email if it's being changed
+        if 'work_email' in vals and vals['work_email']:
+            for emp in self:
+                emp._validate_work_email(vals['work_email'], exclude_id=emp.id)
+
         result = super().write(vals)
 
         # If department changed, update DL membership automatically
@@ -45,6 +54,27 @@ class HREmployee(models.Model):
                     emp._sync_dept_and_add_to_dl()
 
         return result
+
+    def _validate_work_email(self, email, exclude_id=None):
+        """Validate that work_email doesn't already exist"""
+        if not email:
+            return
+
+        domain = [('work_email', '=', email.strip().lower())]
+        if exclude_id:
+            domain.append(('id', '!=', exclude_id))
+
+        existing = self.env['hr.employee'].search(domain, limit=1)
+
+        if existing:
+            raise UserError(
+                f" Email Already Exists!\n\n"
+                f"The email '{email}' is already assigned to:\n"
+                f"  • Employee: {existing.name}\n"
+                f"  • Department: {existing.department_id.name if existing.department_id else 'N/A'}\n"
+                f"  • Job Position: {existing.job_id.name if existing.job_id else 'N/A'}\n\n"
+                f"Please use a different email address."
+            )
 
     def _sync_dept_and_add_to_dl(self):
         """Sync department DL if needed, then add employee - FULLY AUTOMATIC"""
@@ -58,7 +88,7 @@ class HREmployee(models.Model):
         _logger.info(f"   Department ID: {self.department_id.id if self.department_id else 'None'}")
 
         if not self.department_id:
-            _logger.warning(f"⚠️ No department for {self.name}")
+            _logger.warning(f" No department for {self.name}")
             return
 
         if not self.azure_user_id:
@@ -243,6 +273,8 @@ class HREmployee(models.Model):
             raise
         except Exception as e:
             _logger.error(f" Exception: {str(e)}")
+
+    # ... (rest of your methods remain exactly the same)
 
     def _check_and_assign_license(self):
         """Check if license already assigned, then assign if needed"""
