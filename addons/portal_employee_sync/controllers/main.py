@@ -214,15 +214,13 @@ class PortalEmployeeSyncController(http.Controller):
 
             if is_update:
                 _logger.info(f"🔄 Updating ID: {employee.id}")
-                employee.write(employee_vals)
-                request.env.cr.commit()  # 🔥 FORCE COMMIT
+                employee.sudo().write(employee_vals)
                 _logger.info(f"✅ UPDATED: {employee.name} (ID: {employee.id})")
                 message = 'Employee updated successfully'
                 status = 'updated'
             else:
                 _logger.info("🆕 Creating new employee")
                 employee = request.env['hr.employee'].sudo().create(employee_vals)
-                request.env.cr.commit()  # 🔥 FORCE COMMIT
                 _logger.info(f"✅ CREATED: {employee.name} (ID: {employee.id})")
                 _logger.info(f"   Type: {employee.employee_type}, Active: {employee.active}")
                 message = 'Employee created successfully'
@@ -261,7 +259,6 @@ class PortalEmployeeSyncController(http.Controller):
 
         except Exception as e:
             _logger.error(f"❌ ERROR: {str(e)}", exc_info=True)
-            request.env.cr.rollback()
             return self._json_response({'error': str(e), 'status': 500}, 500)
 
     @http.route('/api/employees', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
