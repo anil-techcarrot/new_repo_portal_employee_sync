@@ -134,7 +134,7 @@ class PortalEmployeeSyncController(http.Controller):
 
                 mapped_gender = gender_mapping.get(gender_value)
                 if mapped_gender:
-                    employee_vals['gender'] = mapped_gender
+                    employee_vals['sex'] = mapped_gender
                     _logger.info(f"✅ Gender set to: {mapped_gender}")
                 else:
                     _logger.warning(f"⚠️ Invalid gender value: '{gender_value}'")
@@ -316,7 +316,7 @@ class PortalEmployeeSyncController(http.Controller):
                     'last_name': employee.employee_last_name or '',
                     'department': employee.department_id.name if employee.department_id else '',
                     'job_title': employee.job_id.name if employee.job_id else '',
-                    'gender': employee.gender or '',
+                    'gender': employee.sex or '',
                     'birthday': employee.birthday.strftime('%Y-%m-%d') if employee.birthday else '',
                     'place_of_birth': employee.place_of_birth or '',
                     'marital': employee.marital or '',
@@ -366,7 +366,7 @@ class PortalEmployeeSyncController(http.Controller):
                     'last_name': emp.employee_last_name or '',
                     'department': emp.department_id.name if emp.department_id else '',
                     'job_title': emp.job_id.name if emp.job_id else '',
-                    'gender': emp.gender or '',
+                    'gender': emp.sex or '',
                     'marital': emp.marital or '',
                     'mother_tongue': emp.mother_tongue_id.name if emp.mother_tongue_id else '',
                     'languages_known': ', '.join(
